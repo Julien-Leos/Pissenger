@@ -1,12 +1,11 @@
-import * as functions from 'firebase-functions';
+import * as fb from "firebase-admin";
 
-// Start writing Firebase Functions
-// https://firebase.google.com/docs/functions/typescript
+import { onGroupCreate } from "./groups/onGroupCreate";
 
-export const makeUppercase = functions.firestore.document('/messages/{documentId}')
-.onCreate((snap, context) => {
-    const original = snap.data().original;
-    console.log('Uppercasing UPDATED', context.params.documentId, original);
-    const uppercase = original.toUpperCase();
-    return snap.ref.set({uppercase}, {merge: true});
-});
+import { onGroupGetById } from "./groups/onGroupGet";
+
+fb.initializeApp();
+
+exports.onGroupCreate = onGroupCreate;
+
+exports.onGroupGetById = onGroupGetById;
