@@ -13,7 +13,7 @@ export const onGroupCreate = fn.region("europe-west1").https.onCall(async (data,
       error: "A group need at least one member other than the creator.",
     });
 
-  const user = (await getUserById(context.auth.uid)) as User;
+  const user: User = (await getUserById(context.auth.uid)) as User;
   if (!user) return new fn.https.HttpsError("internal", "", { error: "Can't access to User data." });
 
   await fb.firestore().collection("groups").add({
