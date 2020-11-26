@@ -1,10 +1,9 @@
 import { NotificationType } from "./notificationType.model";
 
 export interface Notification {
-  recipient: string;
   type: NotificationType;
-  group: string;
-  message: string;
+  group: FirebaseFirestore.DocumentReference;
+  message: FirebaseFirestore.DocumentReference | null;
   createdAt: number;
   seenAt: number | null;
 }

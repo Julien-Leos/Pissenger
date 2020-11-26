@@ -1,5 +1,5 @@
 export interface Member {
-  user: string;
+  user: FirebaseFirestore.DocumentReference;
   firstName: string;
   lastName: string;
   picture: string | null;

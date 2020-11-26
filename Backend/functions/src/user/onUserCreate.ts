@@ -4,7 +4,7 @@ import * as fn from "firebase-functions";
 import { User } from "../shared/models/user/user.model";
 
 export const onUserCreate = fn.region("europe-west1").https.onCall(async (data, context) => {
-  if (!context.auth) return new fn.https.HttpsError("unauthenticated", "", { error: "User unauthenticated." });
+  if (!context.auth) return new fn.https.HttpsError("unauthenticated", "", { msg: "User unauthenticated." });
 
   const newUser: User = {
     profile: {
@@ -15,9 +15,8 @@ export const onUserCreate = fn.region("europe-west1").https.onCall(async (data, 
       picture: data.picture || null,
     },
     groups: [],
-    notifications: [],
   };
 
-  await fb.firestore().collection("users").add(newUser);
-  return new fn.https.HttpsError("ok", "", { error: "New user successfully created." });
+  await fb.firestore().collection("users").doc(data.id).set(newUser);
+  return new fn.https.HttpsError("ok", "", { msg: "New user successfully created." });
 });

@@ -1,19 +1,9 @@
-import * as fb from "firebase-admin";
 import * as fn from "firebase-functions";
 
-export const onGroupGet = fn.region("europe-west1").https.onCall(async (data, context) => {
-  if (!context.auth) return new fn.https.HttpsError("unauthenticated", "User unauthenticated.");
+import { getGroupById } from "../shared/services/group.service";
 
-  return await fb
-    .firestore()
-    .collection("groups")
-    .doc(data.id)
-    .get()
-    .then((docRef) => {
-      if (docRef.exists) return docRef.data();
-      else return new fn.https.HttpsError("not-found", "Group " + data.id + " not found.");
-    })
-    .catch((error) => {
-      return new fn.https.HttpsError("internal", "Error getting document.");
-    });
+export const onGroupGet = fn.region("europe-west1").https.onCall(async (data, context) => {
+  if (!context.auth) return new fn.https.HttpsError("unauthenticated", "", { msg: "User unauthenticated." });
+
+  return (await getGroupById(data.id))?.data();
 });

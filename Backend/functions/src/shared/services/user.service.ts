@@ -6,8 +6,8 @@ export const getUserById = (userId: string) => {
     .collection("users")
     .doc(userId)
     .get()
-    .then((docRef) => {
-      if (docRef.exists) return docRef.data();
+    .then((UserRef) => {
+      if (UserRef.exists) return UserRef;
       else return null;
     })
     .catch(() => {
