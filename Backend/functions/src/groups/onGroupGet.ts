@@ -1,7 +1,7 @@
 import * as fb from "firebase-admin";
 import * as fn from "firebase-functions";
 
-export const onGroupGetById = fn.region("europe-west1").https.onCall(async (data, context) => {
+export const onGroupGet = fn.region("europe-west1").https.onCall(async (data, context) => {
   if (!context.auth) return new fn.https.HttpsError("unauthenticated", "User unauthenticated.");
 
   return await fb
