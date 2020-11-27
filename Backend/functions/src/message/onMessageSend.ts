@@ -14,6 +14,7 @@ import { MessageTypeFile } from "../shared/models/message/MessageTypes/messageTy
 
 import { getUserById } from "../shared/services/user.service";
 import { getGroupById } from "../shared/services/group.service";
+import { MemberState } from "../shared/models/group/memberState.enum";
 
 export const onMessageSend = fn.region("europe-west1").https.onCall(async (data, context) => {
   if (!context.auth) return new fn.https.HttpsError("unauthenticated", "", { msg: "User unauthenticated." });
@@ -62,8 +63,10 @@ export const onMessageSend = fn.region("europe-west1").https.onCall(async (data,
   const messageRef = await groupSnap.ref.collection("messages").add(message);
   if (!messageRef) return new fn.https.HttpsError("internal", "", { msg: "Error creating message." });
 
+  // Send a notification to all members expect message's author
   group.members.forEach(async (member: Member) => {
-    await sendNotifToMembers(member.user, groupSnap.ref, messageRef);
+    if (!member.user.isEqual(authorRef) && member.state === MemberState.ACCEPT)
+      await sendNotifToMembers(member.user, groupSnap.ref, messageRef);
   });
 
   return new fn.https.HttpsError("ok", "", { msg: "New message successfully send." });

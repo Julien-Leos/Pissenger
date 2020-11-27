@@ -10,6 +10,8 @@ import { onMessageReact } from "./message/onMessageReact";
 import { onUserCreate } from "./user/onUserCreate";
 import { onUserGet } from "./user/onUserGet";
 
+import { onNotificationListen } from "./notification/onNotificationListen";
+
 fb.initializeApp();
 
 exports.onGroupCreate = onGroupCreate;
@@ -21,3 +23,5 @@ exports.onMessageReact = onMessageReact;
 
 exports.onUserCreate = onUserCreate;
 exports.onUserGet = onUserGet;
+
+exports.onNotificationListen = onNotificationListen;
