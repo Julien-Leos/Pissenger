@@ -77,17 +77,17 @@ const addGroupRefToMembers = async (
     picture: group.picture,
     state: isAdmin ? MemberState.ACCEPT : MemberState.REQUEST, // The admin automatically agrees to join
   };
-  await memberRef.set({ groups: [groupMinified] }, { merge: true }); // TODO: Use firebase.firestore.FieldValue.arrayUnion("greater_virginia") instead
+  await memberRef.update({ groups: fb.firestore.FieldValue.arrayUnion(groupMinified) });
 
+  // When group is deleted, delete the ref to it in User Document
   groupRef.onSnapshot(async (doc) => {
-    // When group is deleted, delete the ref to it in User Document
     if (!doc.exists) await memberRef.update({ groups: fb.firestore.FieldValue.arrayRemove(groupMinified) });
   });
 };
 
 // Send a notification to all members except the admin
 const sendNotifToMembers = async (
-  memberRef: FirebaseFirestore.DocumentReference,
+  userRef: FirebaseFirestore.DocumentReference,
   groupRef: FirebaseFirestore.DocumentReference,
   isAdmin: boolean
 ) => {
@@ -100,5 +100,5 @@ const sendNotifToMembers = async (
     createdAt: Date.now(),
     seenAt: null,
   };
-  await memberRef.collection("notifications").add(notification);
+  await userRef.collection("notifications").add(notification);
 };
