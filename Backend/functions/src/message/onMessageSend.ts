@@ -5,15 +5,15 @@ import { Member } from "../shared/models/group/member.model";
 import { Message } from "../shared/models/message/message.model";
 import { Notification } from "../shared/models/notification/notification.model";
 import { NotificationType } from "../shared/models/notification/notificationType.enum";
-
-import { getUserById } from "../shared/services/user.service";
-import { getGroupById } from "../shared/services/group.service";
 import { MessageType } from "../shared/models/message/messageType.enum";
 import { MessageTypeReply } from "../shared/models/message/MessageTypes/messageTypeReply.model";
 import { MessageTypeText } from "../shared/models/message/MessageTypes/messageTypeText.model";
 import { MessageTypeImage } from "../shared/models/message/MessageTypes/messageTypeImage.model";
 import { MessageTypeVideo } from "../shared/models/message/MessageTypes/messageTypeVideo.model";
 import { MessageTypeFile } from "../shared/models/message/MessageTypes/messageTypeFile.model";
+
+import { getUserById } from "../shared/services/user.service";
+import { getGroupById } from "../shared/services/group.service";
 
 export const onMessageSend = fn.region("europe-west1").https.onCall(async (data, context) => {
   if (!context.auth) return new fn.https.HttpsError("unauthenticated", "", { msg: "User unauthenticated." });
