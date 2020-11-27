@@ -1,4 +1,4 @@
-import { NotificationType } from "./notificationType.model";
+import { NotificationType } from "./notificationType.enum";
 
 export interface Notification {
   type: NotificationType;

@@ -3,8 +3,9 @@ import * as fn from "firebase-functions";
 
 import { Group } from "../shared/models/group/group.model";
 import { Member } from "../shared/models/group/member.model";
+import { MemberState } from "../shared/models/group/memberState.enum";
 import { Notification } from "../shared/models/notification/notification.model";
-import { NotificationType } from "../shared/models/notification/notificationType.model";
+import { NotificationType } from "../shared/models/notification/notificationType.enum";
 import { GroupMinified } from "../shared/models/user/groupMinified.model";
 import { User } from "../shared/models/user/user.model";
 
@@ -43,7 +44,7 @@ export const onGroupCreate = fn.region("europe-west1").https.onCall(async (data,
       lastName: user.profile.lastName,
       picture: user.profile.picture,
       isAdmin: isAdmin,
-      hasLeft: false,
+      state: isAdmin ? MemberState.ACCEPT : MemberState.REQUEST, // The admin automatically agrees to join
     };
     group.members.push(member);
   }
@@ -74,9 +75,14 @@ const addGroupRefToMembers = async (
     group: groupRef,
     name: group.name,
     picture: group.picture,
-    hasJoined: isAdmin, // The admin automatically agrees to join
+    state: isAdmin ? MemberState.ACCEPT : MemberState.REQUEST, // The admin automatically agrees to join
   };
-  await memberRef.set({ groups: [groupMinified] }, { merge: true });
+  await memberRef.set({ groups: [groupMinified] }, { merge: true }); // TODO: Use firebase.firestore.FieldValue.arrayUnion("greater_virginia") instead
+
+  groupRef.onSnapshot(async (doc) => {
+    // When group is deleted, delete the ref to it in User Document
+    if (!doc.exists) await memberRef.update({ groups: fb.firestore.FieldValue.arrayRemove(groupMinified) });
+  });
 };
 
 // Send a notification to all members except the admin
