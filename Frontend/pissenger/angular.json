@@ -123,6 +123,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "pissenger"
+    }
+  },
+  "defaultProject": "pissenger",
+  "cli": {
+    "analytics": "bb888df1-50b3-48c2-b371-08a13204170d"
+  }
 }
