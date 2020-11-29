@@ -3,7 +3,6 @@ import * as fn from "firebase-functions";
 import { Group } from "../shared/models/group/group.model";
 import { Member } from "../shared/models/group/member.model";
 import { Message } from "../shared/models/message/message.model";
-import { Notification } from "../shared/models/notification/notification.model";
 import { NotificationType } from "../shared/models/notification/notificationType.enum";
 import { MessageType } from "../shared/models/message/messageType.enum";
 import { MessageTypeReply } from "../shared/models/message/MessageTypes/messageTypeReply.model";
@@ -15,6 +14,7 @@ import { MessageTypeFile } from "../shared/models/message/MessageTypes/messageTy
 import { getUserById } from "../shared/services/user.service";
 import { getGroupById } from "../shared/services/group.service";
 import { MemberState } from "../shared/models/group/memberState.enum";
+import { createNotification } from "../shared/services/notification.service";
 
 export const onMessageSend = fn.region("europe-west1").https.onCall(async (data, context) => {
   if (!context.auth) return new fn.https.HttpsError("unauthenticated", "", { msg: "User unauthenticated." });
@@ -66,24 +66,8 @@ export const onMessageSend = fn.region("europe-west1").https.onCall(async (data,
   // Send a notification to all members expect message's author
   group.members.forEach(async (member: Member) => {
     if (!member.user.isEqual(authorRef) && member.state === MemberState.ACCEPT)
-      await sendNotifToMembers(member.user, groupSnap.ref, messageRef);
+      await createNotification(NotificationType.NEW_MESSAGE, member.user, groupSnap.ref, messageRef);
   });
 
   return new fn.https.HttpsError("ok", "", { msg: "New message successfully send." });
 });
-
-// Send a notification to all members
-const sendNotifToMembers = async (
-  userRef: FirebaseFirestore.DocumentReference,
-  groupRef: FirebaseFirestore.DocumentReference,
-  messageRef: FirebaseFirestore.DocumentReference
-) => {
-  const notification: Notification = {
-    type: NotificationType.NEW_MESSAGE,
-    group: groupRef,
-    message: messageRef,
-    createdAt: Date.now(),
-    seenAt: null,
-  };
-  await userRef.collection("notifications").add(notification);
-};

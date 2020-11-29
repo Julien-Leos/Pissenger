@@ -9,7 +9,7 @@ import { User } from "../shared/models/user/user.model";
 import { checkGroupViability, deleteGroupById, getGroupById } from "../shared/services/group.service";
 import { getUserById } from "../shared/services/user.service";
 
-export const onGroupRequest = fn.region("europe-west1").https.onCall(async (data, context) => {
+export const onGroupLeave = fn.region("europe-west1").https.onCall(async (data, context) => {
   if (!context.auth) return new fn.https.HttpsError("unauthenticated", "", { msg: "User unauthenticated." });
 
   const groupSnap = await getGroupById(data.groupId);
@@ -29,9 +29,14 @@ export const onGroupRequest = fn.region("europe-west1").https.onCall(async (data
       msg: "Cannot find Member " + userSnap.id + " in Group " + groupSnap.id + ".",
     });
   }
-  if (member.state !== MemberState.REQUEST) {
-    return new fn.https.HttpsError("already-exists", "", {
-      msg: "Member " + userSnap.id + " already answered Group request.",
+  if (member.state === MemberState.LEFT) {
+    return new fn.https.HttpsError("internal", "", {
+      msg: "Member " + userSnap.id + " already left this Group.",
+    });
+  }
+  if (member.state === MemberState.REQUEST) {
+    return new fn.https.HttpsError("internal", "", {
+      msg: "Member " + userSnap.id + " has not yet responded to this group's request.",
     });
   }
 
@@ -44,14 +49,19 @@ export const onGroupRequest = fn.region("europe-west1").https.onCall(async (data
       msg: "Cannot find Group " + groupSnap.id + " in User " + userSnap.id + ".",
     });
   }
-  if (groupMin.state !== MemberState.REQUEST) {
-    return new fn.https.HttpsError("already-exists", "", {
-      msg: "User " + userSnap.id + " already answered Group request.",
+  if (groupMin.state === MemberState.LEFT) {
+    return new fn.https.HttpsError("internal", "", {
+      msg: "User " + userSnap.id + " already left this Group.",
+    });
+  }
+  if (groupMin.state === MemberState.REQUEST) {
+    return new fn.https.HttpsError("internal", "", {
+      msg: "User " + userSnap.id + " has not yet responded to this group's request.",
     });
   }
 
   // Set state property of Group Member
-  member.state = groupMin.state = data.join ? MemberState.ACCEPT : MemberState.DECLINE;
+  member.state = groupMin.state = MemberState.LEFT;
   await groupSnap.ref.update({ members: group.members });
   await userSnap.ref.update({ groups: user.groups });
 
@@ -62,5 +72,5 @@ export const onGroupRequest = fn.region("europe-west1").https.onCall(async (data
     }
   }
 
-  return new fn.https.HttpsError("ok", "", { msg: "User has successfully answered to the Group request." });
+  return new fn.https.HttpsError("ok", "", { msg: "User has successfully leaved the Group." });
 });

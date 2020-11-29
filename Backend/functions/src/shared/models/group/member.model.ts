@@ -5,6 +5,5 @@ export interface Member {
   firstName: string;
   lastName: string;
   picture: string | null;
-  isAdmin: boolean;
   state: MemberState;
 }
